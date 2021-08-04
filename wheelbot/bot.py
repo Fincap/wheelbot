@@ -27,6 +27,7 @@ bot = commands.Bot(command_prefix='!')
 
 votes = {}
 spin_confirmed_by = None
+spinning = False
 
 
 # Helper functions
@@ -170,13 +171,16 @@ async def spin_wheel(ctx):
             await ctx.send(f'{ctx.author.name}, you need to get _someone else_ to confirm the spin.')
 
         else:
-            await ctx.send('Time to spin the wheel!')
-            await ctx.send(file=discord.File(get_random_gif()))
-            await asyncio.sleep(3)
-            await ctx.send('And the winner is...')
-            await asyncio.sleep(1)
-            await ctx.send(f'{roll_winner()}!')
-            clear_confirmation()
+            global spinning
+            if not spinning:
+                spinning = True
+                await ctx.send('Time to spin the wheel!')
+                await ctx.send(file=discord.File(get_random_gif()))
+                await asyncio.sleep(3)
+                await ctx.send('And the winner is...')
+                await asyncio.sleep(1)
+                await ctx.send(f'{roll_winner()}!')
+                clear_confirmation()
 
 
 @bot.command(name='add', aliases=['vote'], help='Add one of your two votes.')

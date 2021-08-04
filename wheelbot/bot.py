@@ -126,6 +126,7 @@ async def show_rules(ctx):
 
 
 @bot.command(name='begin', help='Clear any pre-existing wheel data and start adding those suggestions!')
+@commands.has_role('trusted-respinner')
 async def begin_wheel(ctx):
     # Clear any old data
     global votes

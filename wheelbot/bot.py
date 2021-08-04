@@ -258,15 +258,6 @@ async def alliances(ctx):
     await ctx.send(get_alliances())
 
 
-@bot.command(name='zwm')
-async def zwm(ctx):
-    response = ''
-    for i in range(100):
-        response += f'Zoo wee mama!'
-
-    await ctx.send(response)
-
-
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')

@@ -27,6 +27,7 @@ bot = commands.Bot(command_prefix='!')
 
 votes = {}
 spin_confirmed_by = None
+begin_confirmed_by = None
 spinning = False
 
 
@@ -126,19 +127,27 @@ async def show_rules(ctx):
 
 
 @bot.command(name='begin', help='Clear any pre-existing wheel data and start adding those suggestions!')
-@commands.has_role('trusted-respinner')
 async def begin_wheel(ctx):
     # Clear any old data
     global votes
-    votes = {}
-    clear_confirmation()
+    global spinning
+    global begin_confirmed_by
+    if begin_confirmed_by is None:
+        begin_confirmed_by = ctx.author.id
+        await ctx.send("Wait for confirmation.")
+    elif begin_confirmed_by == ctx.author.id:
+        await ctx.send("Someone else confirm.")
+    else:
+        spinning = False
+        votes = {}
+        clear_confirmation()
 
-    await ctx.send('A new wheel night is in session! Cast your votes by using the **!add [choice name]** command, and '
-                   'once everyone has made their selections, use **!spin** to spin!\n'
-                   'Refresh your knowledge of the Divine Commandments by using **!rules**, and if you\'re stuck try '
-                   'using **!help** (or I guess ask Matt if you _must_).\n\n'
-                   '**NOTE** that the !begin command clears all saved data, so only use it to clear the previous '
-                   'night\'s selections.')
+        await ctx.send('A new wheel night is in session! Cast your votes by using the **!add [choice name]** command, '
+                       'and once everyone has made their selections, use **!spin** to spin!\n'
+                       'Refresh your knowledge of the Divine Commandments by using **!rules**, and if you\'re stuck '
+                       'try using **!help** (or I guess ask Matt if you _must_).\n\n'
+                       '**NOTE** that the !begin command clears all saved data, so only use it to clear the previous '
+                       'night\'s selections.')
 
 
 @bot.command(name='spin', help='After everyone has picked, spin the wheel and reveal the divinely-chosen winner.')
@@ -156,7 +165,8 @@ async def spin_wheel(ctx):
 
     else:
         global spin_confirmed_by
-        if spin_confirmed_by is None:
+        global spinning
+        if spin_confirmed_by is None and not spinning:
             voters = get_voter_names()
 
             response = f'**Ready to spin?** Here is a list of everyone who has entered their choices:\n'
@@ -168,11 +178,10 @@ async def spin_wheel(ctx):
             spin_confirmed_by = ctx.author.id
             await ctx.send(response)
 
-        elif spin_confirmed_by == ctx.author.id:
+        elif spin_confirmed_by == ctx.author.id and not spinning:
             await ctx.send(f'{ctx.author.name}, you need to get _someone else_ to confirm the spin.')
 
         else:
-            global spinning
             if not spinning:
                 spinning = True
                 await ctx.send('Time to spin the wheel!')

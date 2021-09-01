@@ -83,7 +83,7 @@ def get_alliances():
 def get_partial_votes():
     partials = []
     for user in votes.keys():
-        if len(votes[user]["choices"]) != 2:
+        if len(votes[user]["choices"]) == 1:
             partials.append(votes[user]['name'])
 
     return partials

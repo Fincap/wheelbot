@@ -1,5 +1,6 @@
 import asyncio
 import os
+import json
 import random
 import string
 
@@ -11,8 +12,12 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+# Register intents
+intents = discord.Intents.default()
+intents.members = True
+
 # Instantiate bot
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 
 # Data schema
@@ -270,6 +275,28 @@ async def clear_vote(ctx, *, choice=None):
 @bot.command(name='alliances', aliases=['standings', 'rankings'], help='Show the current standings of all votes.')
 async def alliances(ctx):
     await ctx.send(get_alliances())
+
+
+@bot.command(name='infodump')
+async def info_dump(ctx):
+    member_list = {}
+    for member in ctx.message.guild.members:
+        member_list[member.name] = member.id
+    print(member_list)
+
+
+@bot.command(name='savefile')
+async def save_file(ctx):
+    with open('data.json', 'w') as f:
+        json.dump(votes, f, indent=4)
+
+
+@commands.has_role('chadmin')
+@bot.command(name='loadfile')
+async def save_file(ctx):
+    with open('data.json', 'r') as f:
+        global votes
+        votes = json.load(f)
 
 
 @bot.event

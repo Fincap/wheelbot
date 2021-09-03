@@ -277,14 +277,7 @@ async def alliances(ctx):
     await ctx.send(get_alliances())
 
 
-@bot.command(name='infodump')
-async def info_dump(ctx):
-    member_list = {}
-    for member in ctx.message.guild.members:
-        member_list[member.name] = member.id
-    print(member_list)
-
-
+@commands.has_role('chadmin')
 @bot.command(name='savefile')
 async def save_file(ctx):
     with open('data.json', 'w') as f:

@@ -154,6 +154,8 @@ async def begin_wheel(ctx):
                        '**NOTE** that the !begin command clears all saved data, so only use it to clear the previous '
                        'night\'s selections.')
 
+        save_file()
+
 
 @bot.command(name='spin', help='After everyone has picked, spin the wheel and reveal the divinely-chosen winner.')
 async def spin_wheel(ctx):
@@ -222,6 +224,8 @@ async def add_vote(ctx, *, vote):
         clear_confirmation()
         await ctx.send(f'Adding option {fmt_vote} for {user_name}.')
 
+    save_file()
+
 
 @bot.command(name='me', aliases=['mine'], help='Check what you\'re current votes are.')
 async def individual_votes(ctx):
@@ -270,6 +274,7 @@ async def clear_vote(ctx, *, choice=None):
                        f'your current choices.'
 
     await ctx.send(response)
+    save_file()
 
 
 @bot.command(name='proxyvote', aliases=['proxyadd'], help='Vote on behalf of someone without discord..')
@@ -295,6 +300,8 @@ async def proxy_add(ctx, proxy, *, vote):
         votes[user_id]["choices"].append(fmt_vote)
         clear_confirmation()
         await ctx.send(f'Adding option {fmt_vote} for {user_name}.')
+
+    save_file()
 
 
 @bot.command(name='proxyclear', aliases=['proxydelete, proxyremove'], help='Clear a proxy vote.')
@@ -324,6 +331,7 @@ async def clear_vote(ctx, proxy, *, choice=None):
                        f'your current choices.'
 
     await ctx.send(response)
+    save_file()
 
 
 @bot.command(name='alliances', aliases=['standings', 'rankings'], help='Show the current standings of all votes.')
@@ -331,24 +339,25 @@ async def alliances(ctx):
     await ctx.send(get_alliances())
 
 
-@commands.has_role('chadmin')
-@bot.command(name='savefile')
-async def save_file(ctx):
+def save_file():
     with open('data.json', 'w') as f:
         json.dump(votes, f, indent=4)
 
 
-@commands.has_role('chadmin')
-@bot.command(name='loadfile')
-async def save_file(ctx):
-    with open('data.json', 'r') as f:
-        global votes
-        votes = json.load(f)
+def load_file():
+    try:
+        with open('data.json', 'r') as f:
+            global votes
+            votes = json.load(f)
+    except FileNotFoundError:
+        print("data.json not found")
 
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+    load_file()
+    print(f'Votes loaded from file:\n{votes}')
 
 
 # Run Forrest, run!

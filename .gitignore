@@ -2,3 +2,4 @@
 /venv/
 /.idea/
 *.gif
+/data.json

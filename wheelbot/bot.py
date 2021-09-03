@@ -272,6 +272,60 @@ async def clear_vote(ctx, *, choice=None):
     await ctx.send(response)
 
 
+@bot.command(name='proxyvote', aliases=['proxyadd'], help='Vote on behalf of someone without discord..')
+async def proxy_add(ctx, proxy, *, vote):
+    user_id = string.capwords(proxy)
+    user_name = string.capwords(proxy)
+    fmt_vote = string.capwords(vote)
+
+    update_choices = False
+    if user_id in votes.keys():
+        if fmt_vote in votes[user_id]["choices"]:
+            await ctx.send(f'{user_name} you _KNOW_ you can\'t vote for the same thing twice.')
+        elif len(votes[user_id]["choices"]) == 2:
+            await ctx.send(f'Sorry {user_name}, you already have two votes. Use **!clear** to reset both your '
+                           f'choices, or **!clear [choice name]** to remove a specific one.')
+        else:
+            update_choices = True
+    else:
+        votes[user_id] = {"name": user_name, "choices": []}
+        update_choices = True
+
+    if update_choices:
+        votes[user_id]["choices"].append(fmt_vote)
+        clear_confirmation()
+        await ctx.send(f'Adding option {fmt_vote} for {user_name}.')
+
+
+@bot.command(name='proxyclear', aliases=['proxydelete, proxyremove'], help='Clear a proxy vote.')
+async def clear_vote(ctx, proxy, *, choice=None):
+    user_id = string.capwords(proxy)
+    user_name = string.capwords(proxy)
+
+    # Check for any votes to begin with
+    if user_id not in votes.keys():
+        await ctx.send(f'No votes found for {user_name}.')
+        return
+
+    # Otherwise, clear for parameters
+    if choice is None:
+        votes[user_id]["choices"] = []
+        response = f'Cleared all votes for {user_name}.'
+        clear_confirmation()
+
+    else:
+        fmt_choice = string.capwords(choice)
+        if fmt_choice in votes[user_id]["choices"]:
+            votes[user_id]["choices"].remove(fmt_choice)
+            response = f'Removed {fmt_choice} from {user_name}\'s votes.'
+            clear_confirmation()
+        else:
+            response = f'No vote for {fmt_choice} found, check your spelling and try again. Use **!me** to check ' \
+                       f'your current choices.'
+
+    await ctx.send(response)
+
+
 @bot.command(name='alliances', aliases=['standings', 'rankings'], help='Show the current standings of all votes.')
 async def alliances(ctx):
     await ctx.send(get_alliances())
